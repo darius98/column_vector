@@ -9,14 +9,16 @@ target_include_directories(column_vector INTERFACE include)
 set(BENCHMARK_ENABLE_TESTING OFF)
 add_subdirectory(google_benchmark)
 
-function(add_benchmark name)
-    add_executable(bm_${name} benchmarks/${name}.cpp)
-    target_link_libraries(bm_${name} column_vector benchmark)
-endfunction()
+add_executable(bm_all
+    benchmarks/emplace_back_unaligned.cpp
+    benchmarks/emplace_back_aligned.cpp
+    benchmarks/iterate_column_unaligned.cpp
+    benchmarks/iterate_column_aligned.cpp)
+target_link_libraries(bm_all PUBLIC column_vector benchmark_main)
+target_compile_definitions(bm_all PUBLIC LINK_ALL_BENCHMARKS)
 
-add_benchmark(emplace_back_unaligned)
-add_benchmark(emplace_back_large)
-add_benchmark(emplace_back_aligned)
-add_benchmark(iterate_column_unaligned)
-add_benchmark(iterate_column_large)
-add_benchmark(iterate_column_aligned)
+add_custom_target(compare_to_std_vector
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compare_to_std_vector.sh
+        "${CMAKE_CURRENT_SOURCE_DIR}/google_benchmark/tools/compare.py"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_dependencies(compare_to_std_vector bm_all)

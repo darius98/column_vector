@@ -1,23 +1,15 @@
-#include <vector>
-
-#include <benchmark/benchmark.h>
-#include <column_vector.h>
-
-#include "data.h"
+#include "column_vector_benchmark.h"
 
 void column_vector_emplace_back_aligned(benchmark::State& state) {
   for (auto _ : state) {
-    column::column_vector<int, int, int, int> v;
+    column::column_vector<Aligned> v;
     const std::size_t num = state.range(0);
     for (std::size_t i = 0; i < num; ++i) {
       v.emplace_back(1, 2, 3, 4);
     }
   }
 }
-BENCHMARK(column_vector_emplace_back_aligned) // NOLINT(cert-err58-cpp)
-    ->RangeMultiplier(8)
-    ->Range(512, 1u << 21u)
-    ->Unit(benchmark::kMicrosecond);
+COLUMN_VECTOR_BM(column_vector_emplace_back_aligned); // NOLINT(cert-err58-cpp)
 
 void std_vector_emplace_back_aligned(benchmark::State& state) {
   for (auto _ : state) {
@@ -28,9 +20,4 @@ void std_vector_emplace_back_aligned(benchmark::State& state) {
     }
   }
 }
-BENCHMARK(std_vector_emplace_back_aligned) // NOLINT(cert-err58-cpp)
-    ->RangeMultiplier(8)
-    ->Range(512, 1u << 21u)
-    ->Unit(benchmark::kMicrosecond);
-
-BENCHMARK_MAIN();
+STD_VECTOR_BM(std_vector_emplace_back_aligned); // NOLINT(cert-err58-cpp)
